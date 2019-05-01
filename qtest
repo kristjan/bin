@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+patterns = ARGV.to_a.map { |p| "*#{p}*" }
+# TODO: Don't require files to be committed to Git
+watch_files = `git ls-files #{patterns.join(' ')}`.split("\n")
+spec_files = watch_files.select { |f| f =~ %r{^spec/} }
+
+watch_files = watch_files.join(' ')
+spec_files = spec_files.join(' ')
+
+puts <<-TXT
+
+  Watching #{watch_files}
+  Running #{spec_files}
+
+TXT
+
+exec("fswatch -o #{watch_files} | xargs -t -n1 -I{} rspec #{spec_files}")
